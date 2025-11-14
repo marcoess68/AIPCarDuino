@@ -23,12 +23,13 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // ------------------ Configurable constants ------------------
 const int THRESHOLD        = 40;    // cm distance to trigger obstacle
-const int SWEEP_DELAY      = 2;     // ms between servo steps
-const int STEP_SIZE        = 6;    // degrees per update (larger = faster sweep)
-const int MAX_SPEED        = 20;    // % motor speed
+const int SWEEP_DELAY      = 8;     // ms between servo steps
+const int LCD_DELAY        = 200;
+const int STEP_SIZE        = 5;    // degrees per update (larger = faster sweep)
+const int MAX_SPEED        = 40;    // % motor speed
 const int REVERSE_TIME     = 2500;  // ms to reverse
 const int TURN_TIME        = 2500;  // ms to turn
-const int SERVO_SETTLE     = 1;    // ms wait after servo write
+const int SERVO_SETTLE     = 2;    // ms wait after servo write
 const int MEASURE_SAMPLES  = 3;     // number of readings to average
 const int DEBOUNCE_COUNT   = 2;     // consecutive readings below threshold
 const unsigned long AVOID_COOLDOWN = 100; // ms cooldown after avoidance
@@ -47,6 +48,7 @@ int lastObstacleAngle = 90;
 
 // ------------------ Timing / detection ------------------
 unsigned long lastSweepTime = 0;
+unsigned long lastLCDTime = 0;
 int consecutiveBelow = 0;
 unsigned long lastAvoidEndTime = 0;
 
@@ -58,16 +60,35 @@ unsigned long lastBlinkTime = 0;
 bool startAllowed = true;
 
 // ------------------ LCD helper ------------------
+
 void updateLCD(int dist, int angle, String state) {
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("D:");
-  lcd.print(dist);
-  lcd.print("cm A:");
-  lcd.print(angle);
-  lcd.setCursor(0, 1);
-  lcd.print(state);
+  if (millis() - lastLCDTime > LCD_DELAY) {
+    lcd.home();
+    lcd.print("D:");
+
+    char distStr[4];   // 3 digits + null terminator
+    sprintf(distStr, "%03d", dist); // leading zeros
+    lcd.print(distStr);
+
+    lcd.print("cm A:");
+
+    char angleStr[4];  // 3 digits + null terminator
+    sprintf(angleStr, "%03d", angle); // leading zeros
+    lcd.print(angleStr);
+    lcd.print((char)223);
+
+    lcd.setCursor(0, 1);
+
+    // Pad state to 16 characters
+    while (state.length() < 16) {
+      state += ' ';
+    }
+    lcd.print(state);
+
+    lastLCDTime = millis();
+  }
 }
+
 
 // ------------------ Radar sweeping ------------------
 bool sweepRadar() {
@@ -211,8 +232,6 @@ void setAllLights(bool state) {
   digitalWrite(BACK_LED_LEFT, state);
   digitalWrite(BACK_LED_RIGHT, state);
 }
-
-
 
 void setup() {
   Serial.begin(115200);
