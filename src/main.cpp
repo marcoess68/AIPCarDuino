@@ -75,7 +75,7 @@ void updateLCD(int dist, int angle, String state) {
     char angleStr[4];  // 3 digits + null terminator
     sprintf(angleStr, "%03d", angle); // leading zeros
     lcd.print(angleStr);
-    lcd.print((char)223);
+    lcd.print((char)223); // Degrees Symbol
 
     lcd.setCursor(0, 1);
 
@@ -240,7 +240,7 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
-  lcd.print("Autonomous Car");
+  lcd.print("AIPCarDuino");
   lcd.setCursor(0, 1);
   lcd.print("System Ready!");
   delay(1500);
@@ -279,7 +279,7 @@ void setup() {
   // Keep lights ON
   setAllLights(HIGH);
 
-  Serial.println("Autonomous car ready!");
+  Serial.println("AIPCarDuino");
   updateLCD(0, servoPos, "READY");
 }
 
