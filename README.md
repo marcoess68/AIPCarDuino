@@ -1,4 +1,4 @@
-# Main.ccp
+# AIPCarDuino Main Sketch with some of new skills
 
 #include <Servo.h>
 #include <Wire.h>
